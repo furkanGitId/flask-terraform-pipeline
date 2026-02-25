@@ -203,6 +203,7 @@ pipeline {
                     pip install --upgrade pip
                     pip install -r requirements.txt
                     pip install flake8  # if not in requirements.txt
+                    pip install pytest  # Add this line to install pytest
 
                     flake8 app.py --max-line-length=120 || true
                 '''
@@ -212,7 +213,7 @@ pipeline {
 
         // ── STAGE 3 ──────────────────────────────────────────────────────────
         // app.py is in root so pytest looks in root directly
-        stage('Test') {
+        stage('Test' ) {
             steps {
                 sh '''
                     . venv/bin/activate
@@ -224,6 +225,7 @@ pipeline {
             }
         }
 
+
         // ── STAGE 4 ──────────────────────────────────────────────────────────
         // Build Docker image and push to Docker Hub
         // furkandevops/flask-terraform-pipeline:1  (build number)
@@ -232,8 +234,8 @@ pipeline {
             steps {
                 // Use withCredentials to securely bind your Jenkins Credentials ID
                 withCredentials([usernamePassword(credentialsId: "${DOCKER_CRED_ID}", 
-                                passwordVariable: 'DOCKERHUB_PASSWORD', 
-                                usernameVariable: 'DOCKERHUB_USERNAME')]) {
+                                        passwordVariable: 'DOCKERHUB_PASSWORD', 
+                                        usernameVariable: 'DOCKERHUB_USERNAME')]) {
                     sh """
                         echo "${DOCKERHUB_PASSWORD}" | docker login -u "${DOCKERHUB_USERNAME}" --password-stdin
                         docker build -t ${DOCKER_HUB_REPO}:${IMAGE_TAG} .
