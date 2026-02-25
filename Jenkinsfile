@@ -192,25 +192,22 @@ pipeline {
                 sh '''
                     pip3 install --upgrade pip --break-system-packages
                     pip3 install -r requirements.txt --break-system-packages
-                    flake8 app.py --max-line-length=120
+                    python3 -m flake8 app.py --max-line-length=120
                 '''
                 echo "✅ Dependencies installed and lint passed"
             }
         }
 
-        // ── STAGE 3 ──────────────────────────────────────────────────────────
         stage('Test') {
             steps {
                 sh '''
                     mkdir -p reports
-                    pytest -v --junitxml=reports/test-results.xml
+                    python3 -m pytest -v --junitxml=reports/test-results.xml
                 '''
                 echo "✅ All tests passed"
             }
             post {
-                always {
-                    junit 'reports/test-results.xml'
-                }
+                always { junit 'reports/test-results.xml' }
             }
         }
 
