@@ -187,45 +187,58 @@ pipeline {
         }
 
         // ── STAGE 2 ──────────────────────────────────────────────────────────
+        // requirements.txt is in root folder (not inside app/)
         stage('Install & Lint') {
             steps {
                 sh '''
-                    pip3 install --upgrade pip --break-system-packages
-                    pip3 install -r requirements.txt --break-system-packages
-                    python3 -m flake8 app.py --max-line-length=120
+                    # Correct way to test if venv module is available
+                    python3 -c "import venv" || { echo "❌ python3-venv not installed — run: sudo apt install python3-venv"; exit 1; }
+                    python3 -m venv venv
+                    . venv/bin/activate
+                    pip install --upgrade pip
+                    pip install -r requirements.txt
+                    flake8 app.py --max-line-length=120
                 '''
-                echo "✅ Dependencies installed and lint passed 1"
+                echo "✅ Dependencies installed and lint passed"
             }
         }
 
+        // ── STAGE 3 ──────────────────────────────────────────────────────────
+        // app.py is in root so pytest looks in root directly
         stage('Test') {
             steps {
                 sh '''
+                    . venv/bin/activate
                     mkdir -p reports
-                    python3 -m pytest -v --junitxml=reports/test-results.xml
+                    pytest -v \
+                        --junitxml=reports/test-results.xml
                 '''
                 echo "✅ All tests passed"
             }
             post {
-                always { junit 'reports/test-results.xml' }
+                always {
+                    junit 'reports/test-results.xml'
+                }
             }
         }
 
         // ── STAGE 4 ──────────────────────────────────────────────────────────
+        // Build Docker image and push to Docker Hub
+        // furkandevops/flask-terraform-pipeline:1  (build number)
+        // furkandevops/flask-terraform-pipeline:latest
         stage('Docker Build & Push') {
             steps {
-                script {
-                    docker.withRegistry('https://registry.hub.docker.com', DOCKER_CRED_ID) {
-                        def img = docker.build("${DOCKER_HUB_REPO}:${IMAGE_TAG}", ".")
-                        img.push()
-                        img.push("latest")
-                    }
-                }
-                echo "✅ Docker image pushed to Docker Hub"
+                sh """
+                    echo "\$DOCKERHUB_PASSWORD" | docker login -u "\$DOCKERHUB_USERNAME" --password-stdin
+                    docker build -t ${DOCKER_HUB_REPO}:${IMAGE_TAG} .
+                    docker push ${DOCKER_HUB_REPO}:${IMAGE_TAG}
+                    docker push ${DOCKER_HUB_REPO}:latest
+                """
             }
         }
 
         // ── STAGE 5 ──────────────────────────────────────────────────────────
+        // Terraform pulls the image and runs it as a container
         stage('Terraform Deploy') {
             steps {
                 dir('terraform') {
@@ -242,6 +255,7 @@ pipeline {
         }
 
         // ── STAGE 6 ──────────────────────────────────────────────────────────
+        // Confirm the container is actually running and responding
         stage('Smoke Test') {
             steps {
                 sh '''
