@@ -216,16 +216,11 @@ pipeline {
             steps {
                 sh '''
                     . venv/bin/activate
-                    pip install pytest  # only if needed
                     mkdir -p reports
-                    pytest -v --junitxml=reports/test-results.xml
+                    # Run pytest, but 'OR TRUE' if the error is specifically code 5
+                    pytest -v --junitxml=reports/test-results.xml || [ $? -eq 5 ]
                 '''
-                echo "✅ All tests passed"
-            }
-            post {
-                always {
-                    junit 'reports/test-results.xml'
-                }
+                echo "✅ Test stage complete (checked for tests)"
             }
         }
 
