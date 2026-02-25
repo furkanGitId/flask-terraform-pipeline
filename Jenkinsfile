@@ -191,6 +191,8 @@ pipeline {
         stage('Install & Lint') {
             steps {
                 sh '''
+                    # Ensure venv is available before proceeding
+                    python3 -m venv --version || { echo "python3-venv missing"; exit 1; }
                     python3 -m venv venv
                     . venv/bin/activate
                     pip install --upgrade pip
