@@ -191,12 +191,8 @@ pipeline {
         stage('Install & Lint') {
             steps {
                 sh '''
-                    # Correct way to test if venv module is available
-                    python3 -c "import venv" || { echo "❌ python3-venv not installed — run: sudo apt install python3-venv"; exit 1; }
-                    python3 -m venv venv
-                    . venv/bin/activate
-                    pip install --upgrade pip
-                    pip install -r requirements.txt
+                    pip3 install --user --upgrade pip
+                    pip3 install --user -r requirements.txt
                     flake8 app.py --max-line-length=120
                 '''
                 echo "✅ Dependencies installed and lint passed"
@@ -208,18 +204,12 @@ pipeline {
         stage('Test') {
             steps {
                 sh '''
-                    . venv/bin/activate
                     mkdir -p reports
-                    pytest -v \
-                        --junitxml=reports/test-results.xml
+                    pytest -v --junitxml=reports/test-results.xml
                 '''
                 echo "✅ All tests passed"
             }
-            post {
-                always {
-                    junit 'reports/test-results.xml'
-                }
-            }
+            post { always { junit 'reports/test-results.xml' } }
         }
 
         // ── STAGE 4 ──────────────────────────────────────────────────────────
