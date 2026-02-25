@@ -194,7 +194,7 @@ pipeline {
                     pip3 install -r requirements.txt --break-system-packages
                     python3 -m flake8 app.py --max-line-length=120
                 '''
-                echo "✅ Dependencies installed and lint passed"
+                echo "✅ Dependencies installed and lint passed 1"
             }
         }
 
