@@ -191,8 +191,10 @@ pipeline {
         stage('Install & Lint') {
             steps {
                 sh '''
-                    pip3 install --user --upgrade pip
-                    pip3 install --user -r requirements.txt
+                    python3 -m venv venv
+                    . venv/bin/activate
+                    pip install --upgrade pip
+                    pip install -r requirements.txt
                     flake8 app.py --max-line-length=120
                 '''
                 echo "✅ Dependencies installed and lint passed"
