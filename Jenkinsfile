@@ -187,16 +187,11 @@ pipeline {
         }
 
         // ── STAGE 2 ──────────────────────────────────────────────────────────
-        // requirements.txt is in root folder (not inside app/)
         stage('Install & Lint') {
             steps {
                 sh '''
-                    # Correct way to test if venv module is available
-                    python3 -c "import venv" || { echo "❌ python3-venv not installed — run: sudo apt install python3-venv"; exit 1; }
-                    python3 -m venv venv
-                    . venv/bin/activate
-                    pip install --upgrade pip
-                    pip install -r requirements.txt
+                    pip3 install --upgrade pip --break-system-packages
+                    pip3 install -r requirements.txt --break-system-packages
                     flake8 app.py --max-line-length=120
                 '''
                 echo "✅ Dependencies installed and lint passed"
@@ -204,14 +199,11 @@ pipeline {
         }
 
         // ── STAGE 3 ──────────────────────────────────────────────────────────
-        // app.py is in root so pytest looks in root directly
         stage('Test') {
             steps {
                 sh '''
-                    . venv/bin/activate
                     mkdir -p reports
-                    pytest -v \
-                        --junitxml=reports/test-results.xml
+                    pytest -v --junitxml=reports/test-results.xml
                 '''
                 echo "✅ All tests passed"
             }
@@ -223,9 +215,6 @@ pipeline {
         }
 
         // ── STAGE 4 ──────────────────────────────────────────────────────────
-        // Build Docker image and push to Docker Hub
-        // furkandevops/flask-terraform-pipeline:1  (build number)
-        // furkandevops/flask-terraform-pipeline:latest
         stage('Docker Build & Push') {
             steps {
                 script {
@@ -240,7 +229,6 @@ pipeline {
         }
 
         // ── STAGE 5 ──────────────────────────────────────────────────────────
-        // Terraform pulls the image and runs it as a container
         stage('Terraform Deploy') {
             steps {
                 dir('terraform') {
@@ -257,7 +245,6 @@ pipeline {
         }
 
         // ── STAGE 6 ──────────────────────────────────────────────────────────
-        // Confirm the container is actually running and responding
         stage('Smoke Test') {
             steps {
                 sh '''
