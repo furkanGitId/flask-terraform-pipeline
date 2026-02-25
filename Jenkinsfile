@@ -191,19 +191,10 @@ pipeline {
         stage('Install & Lint') {
             steps {
                 sh '''
-                    # Create bare venv (skips ensurepip)
-                    python3 -m venv --without-pip venv
-
-                    # Activate and bootstrap pip manually
+                    python3 -m venv venv
                     . venv/bin/activate
-                    curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
-                    python get-pip.py --no-warn-script-location
-
-                    # Now upgrade pip and install your deps
                     pip install --upgrade pip
-                    pip install -r requirements.txt
-                    pip install flake8  # if not in requirements.txt
-
+                    pip install -r requirements.txt flake8 pytest
                     flake8 app.py --max-line-length=120
                 '''
                 echo "✅ Dependencies installed and lint passed"
