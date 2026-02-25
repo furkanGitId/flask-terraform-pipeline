@@ -191,10 +191,13 @@ pipeline {
         stage('Install & Lint') {
             steps {
                 sh '''
-                    python3 -m venv venv
-                    . venv/bin/activate
-                    pip install --upgrade pip
-                    pip install -r requirements.txt
+                    sudo apt-get update -y
+                    sudo apt-get install -y python3 python3-pip python3-venv  # venv optional but harmless
+
+                    python3 -m pip install --upgrade pip
+                    python3 -m pip install -r requirements.txt
+                    python3 -m pip install flake8  # ensure flake8 is available
+
                     flake8 app.py --max-line-length=120
                 '''
                 echo "✅ Dependencies installed and lint passed"
@@ -206,12 +209,17 @@ pipeline {
         stage('Test') {
             steps {
                 sh '''
+                    python3 -m pip install pytest  # if not already in requirements.txt
                     mkdir -p reports
-                    pytest -v --junitxml=reports/test-results.xml
+                    python3 -m pytest -v --junitxml=reports/test-results.xml
                 '''
                 echo "✅ All tests passed"
             }
-            post { always { junit 'reports/test-results.xml' } }
+            post {
+                always {
+                    junit 'reports/test-results.xml'
+                }
+            }
         }
 
         // ── STAGE 4 ──────────────────────────────────────────────────────────
