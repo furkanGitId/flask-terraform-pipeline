@@ -252,17 +252,19 @@ pipeline {
         stage('Terraform Deploy') {
             steps {
                 dir('terraform') {
-                    sh """
+                    sh '''
+                        docker rm -f flask-todo-app || true
+
                         terraform init -input=false
                         terraform plan -input=false \
-                            -var="docker_image=${DOCKER_HUB_REPO}:${IMAGE_TAG}" \
-                            -out=tfplan
+                        -var="docker_image=${DOCKER_HUB_REPO}:${IMAGE_TAG}" \
+                        -out=tfplan
                         terraform apply -input=false -auto-approve tfplan
-                    """
+                    '''
                 }
-                echo "✅ Terraform deployment complete"
             }
         }
+
 
         // ── STAGE 6 ──────────────────────────────────────────────────────────
         // Confirm the container is actually running and responding
