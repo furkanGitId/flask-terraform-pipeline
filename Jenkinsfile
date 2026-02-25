@@ -191,10 +191,19 @@ pipeline {
         stage('Install & Lint') {
             steps {
                 sh '''
-                    python3 -m venv venv
+                    # Create bare venv (skips ensurepip)
+                    python3 -m venv --without-pip venv
+
+                    # Activate and bootstrap pip manually
                     . venv/bin/activate
+                    curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+                    python get-pip.py --no-warn-script-location
+
+                    # Now upgrade pip and install your deps
                     pip install --upgrade pip
-                    pip install -r requirements.txt flake8
+                    pip install -r requirements.txt
+                    pip install flake8  # if not in requirements.txt
+
                     flake8 app.py --max-line-length=120
                 '''
                 echo "✅ Dependencies installed and lint passed"
@@ -206,12 +215,18 @@ pipeline {
         stage('Test') {
             steps {
                 sh '''
-                    export PATH="$HOME/.local/bin:$PATH"
+                    . venv/bin/activate
+                    pip install pytest  # only if needed
                     mkdir -p reports
                     pytest -v --junitxml=reports/test-results.xml
                 '''
+                echo "✅ All tests passed"
             }
-            post { always { junit 'reports/test-results.xml' } }
+            post {
+                always {
+                    junit 'reports/test-results.xml'
+                }
+            }
         }
 
         // ── STAGE 4 ──────────────────────────────────────────────────────────
