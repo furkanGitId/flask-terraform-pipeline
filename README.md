@@ -119,51 +119,51 @@ Login: `admin` / `admin` → you'll be asked to set a new password.
 
 ### 3b. Generate a token for Jenkins:
 
-Click your profile icon (top right) → `My Account`
-Click the `Security` tab
-Token name: `jenkins-token`
-Type: `Global Analysis Token`
-Click `Generate`
-Copy the token NOW — you won't see it again!
+* Click your profile icon (top right) → `My Account`
+* Click the `Security` tab
+* Token name: `jenkins-token`
+* Type: `Global Analysis Token`
+* Click `Generate`
+* Copy the token NOW — you won't see it again!
 
 > ⚠️ It looks like `sqa_abc123xyz...` — paste it in a notepad immediately.
 
 ### 3c. Add token to Jenkins:
 
-`Jenkins` → `Manage Jenkins` → `Credentials` → `System` → `Global` → `Add Credentials`
-Kind: `Secret text`
-Secret: paste your SonarQube token
-ID: `sonarqube-token`
-Click `Save`
+* `Jenkins` → `Manage Jenkins` → `Credentials` → `System` → `Global` → `Add Credentials`
+* Kind: `Secret text`
+* Secret: paste your SonarQube token
+* ID: `sonarqube-token`
+* Click `Save`
 
 ### 3d. Connect SonarQube to Jenkins:
 
-`Jenkins` → `Manage Jenkins` → `System`
-Scroll down to `SonarQube servers` → click `Add`
-Name: `SonarQube`
-Server URL: `http://YOUR_IP:9000`
-Token: select `sonarqube-token`
-Click `Save`
+* `Jenkins` → `Manage Jenkins` → `System`
+* Scroll down to `SonarQube servers` → click `Add`
+* Name: `SonarQube`
+* Server URL: `http://YOUR_IP:9000`
+* Token: select `sonarqube-token`
+* Click `Save`
 
 > 💡 Find your IP by running: `hostname -I` — use the first number, e.g., `172.31.66.217`.
 
 ### 3e. Add SonarQube Scanner tool:
 
-`Jenkins` → `Manage Jenkins` → `Global Tool Configuration`
-Scroll to `SonarQube Scanner` → click `Add`
-Name: `SonarQube Scanner`
-Check "Install automatically"
-Click `Save`
+* `Jenkins` → `Manage Jenkins` → `Global Tool Configuration`
+* Scroll to `SonarQube Scanner` → click `Add`
+* Name: `SonarQube Scanner`
+* Check "Install automatically"
+* Click `Save`
 
 ### 3f. Fix Quality Gate timeout — DON'T SKIP THIS:
 
 Without this, your pipeline will hang forever waiting for SonarQube.
 
-`SonarQube` → `Administration` → `Configuration` → `Webhooks` → `Create`
-Name: `jenkins-webhook`
-Run `hostname -I` and use that IP
-URL: `http://YOUR_IP:8080/sonarqube-webhook/`
-Click `Save`
+* `SonarQube` → `Administration` → `Configuration` → `Webhooks` → `Create`
+* Name: `jenkins-webhook`
+* Run `hostname -I` and use that IP
+* URL: `http://YOUR_IP:8080/sonarqube-webhook/`
+* Click `Save`
 
 > ⚠️ Use your real local IP — NOT `localhost`. SonarQube is inside Docker so `localhost` points to itself, not Jenkins.
 
@@ -229,24 +229,24 @@ git push -u origin main
 
 ### 5c. Add a Webhook so GitHub notifies Jenkins:
 
-`GitHub repo` → `Settings` → `Webhooks` → `Add webhook`
-Payload URL: `https://YOUR-NGROK-URL/github-webhook/`
-Content type: `application/json`
-Events: select "Just the push event"
-Active: ✅ checked
-Click `Add webhook`
+* `GitHub repo` → `Settings` → `Webhooks` → `Add webhook`
+* Payload URL: `https://YOUR-NGROK-URL/github-webhook/`
+* Content type: `application/json`
+* Events: select "Just the push event"
+* Active: ✅ checked
+* Click `Add webhook`
 
 ### 5d. Create a GitHub Personal Access Token (PAT):
 
 Jenkins needs permission to read your repo.
 
-`GitHub` → top right avatar → `Settings`
-Scroll down → `Developer settings`
-`Personal access tokens` → `Tokens (classic)`
-Click `Generate new token (classic)`
-Note: `Jenkins-Token`
-Check these scopes: `repo` ✅ and `admin:repo_hook` ✅
-Click `Generate token` → copy it immediately
+* `GitHub` → top right avatar → `Settings`
+* Scroll down → `Developer settings`
+* `Personal access tokens` → `Tokens (classic)`
+* Click `Generate new token (classic)`
+* Note: `Jenkins-Token`
+* Check these scopes: `repo` ✅ and `admin:repo_hook` ✅
+* Click `Generate token` → copy it immediately
 
 ### 5e. Add PAT to Jenkins:
 
