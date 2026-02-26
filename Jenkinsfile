@@ -61,11 +61,13 @@ pipeline {
         // furkandevops/flask-terraform-pipeline:latest
         stage('Docker Build & Push') {
             steps {
-                withCredentials([usernamePassword(credentialsId: "${DOCKER_CRED_ID}", 
-                                        passwordVariable: 'DOCKERHUB_PASSWORD', 
-                                        usernameVariable: 'DOCKERHUB_USERNAME')]) {
+                withCredentials([usernamePassword(
+                    credentialsId: "${DOCKER_CRED_ID}", 
+                    passwordVariable: 'DOCKERHUB_PASSWORD', 
+                    usernameVariable: 'DOCKERHUB_USERNAME'
+                )]) {
                     sh '''
-                        echo "$DOCKERHUB_PASSWORD" | docker login -u "$DOCKERHUB_USER" --password-stdin
+                        echo "$DOCKERHUB_PASSWORD" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
                         docker build -t $DOCKER_HUB_REPO:$IMAGE_TAG .
                         docker tag  $DOCKER_HUB_REPO:$IMAGE_TAG $DOCKER_HUB_REPO:latest
                         docker push $DOCKER_HUB_REPO:$IMAGE_TAG
