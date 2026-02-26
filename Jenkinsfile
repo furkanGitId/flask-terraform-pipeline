@@ -40,22 +40,7 @@ pipeline {
             }
         }
 
-        // // ── STAGE 3 ──────────────────────────────────────────────────────────
-        // // app.py is in root so pytest looks in root directly
-        // stage('Test' ) {
-        //     steps {
-        //         sh '''
-        //             . venv/bin/activate
-        //             mkdir -p reports
-        //             # Run pytest, but 'OR TRUE' if the error is specifically code 5
-        //             pytest -v --junitxml=reports/test-results.xml || [ $? -eq 5 ]
-        //         '''
-        //         echo "✅ Test stage complete (checked for tests)"
-        //     }
-        // }
-
-
-        // ── STAGE 4 ──────────────────────────────────────────────────────────
+        // ── STAGE 3 ──────────────────────────────────────────────────────────
         // Build Docker image and push to Docker Hub
         // furkandevops/flask-terraform-pipeline:1  (build number)
         // furkandevops/flask-terraform-pipeline:latest
@@ -77,7 +62,7 @@ pipeline {
             }
         }
 
-        // ── STAGE 5 ──────────────────────────────────────────────────────────
+        // ── STAGE 4 ──────────────────────────────────────────────────────────
         // Terraform pulls the image and runs it as a container
         stage('Terraform Deploy') {
             steps {
@@ -96,7 +81,7 @@ pipeline {
         }
 
 
-        // ── STAGE 6 ──────────────────────────────────────────────────────────
+        // ── STAGE 5 ──────────────────────────────────────────────────────────
         // Confirm the container is actually running and responding
         stage('Smoke Test') {
             steps {
