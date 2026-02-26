@@ -431,7 +431,7 @@ DOCKER_HUB_REPO = "furkandevops/flask-terraform-pipeline"
 Save it as `Jenkinsfile` in the **root of your project** (no file extension):
 
 ```
-todo-cicd-pipeline/
+flask-terraform-pipeline/
 ├── Jenkinsfile          ← here
 ├── Dockerfile
 ├── app/
